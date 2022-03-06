@@ -1,11 +1,13 @@
 package com.test1.gosecuapp2;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -18,52 +20,56 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+public class LoginActivity extends AppCompatActivity {
 
+    private static String Json_Url2 = "https://run.mocky.io/v3/01b8df93-f700-465d-bf24-8242fab1901a";
 
-public class MainActivity extends AppCompatActivity {
-
-    RecyclerView recyclerView;
-    List<Materiel> materiels;
-    Adapter adapter;
-
-    private static String Json_Url = "https://run.mocky.io/v3/853e8ed9-570c-44da-b7b4-795000c73de3";
+    String login;
+    String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        recyclerView = findViewById(R.id.listeMaterielRecycle);
-        materiels = new ArrayList<>();
+        extractUser();
 
-        extractMateriel();
+        TextView username =(TextView) findViewById(R.id.etName);
+        TextView password =(TextView) findViewById(R.id.etPassword);
+
+        Button loginbtn = (Button) findViewById(R.id.btnLogin);
+
+        //admin and admin
+
+        loginbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(username.getText().toString().equals(login) && password.getText().toString().equals(password)){
+                    //correct
+                    Toast.makeText(LoginActivity.this,"LOGIN SUCCESSFUL",Toast.LENGTH_SHORT).show();
+                }else
+                    //incorrect
+                    Toast.makeText(LoginActivity.this,"LOGIN FAILED !!!",Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void extractMateriel() {
+    private void extractUser() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, Json_Url, null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, Json_Url2, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         JSONObject songObject = response.getJSONObject(i);
 
-                        Materiel materiel = new Materiel();
-                        materiel.setMateriel(songObject.getString("materiel").toString());
-                        materiel.setRole(songObject.getString("role".toString()));
-                        materiel.setCoverImage(songObject.getString("image"));
-                        materiels.add(materiel);
+                        login = songObject.getString("login");
+                        password = songObject.getString("password");
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
-
-                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                adapter = new Adapter(getApplicationContext(),materiels);
-                recyclerView.setAdapter(adapter);
             }
         }, new Response.ErrorListener() {
             /**
